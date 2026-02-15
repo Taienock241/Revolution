@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>employee form</title>
+    <style>
+        body{
+            justify-content: center;
+            align-items: flex-end;
+            
+        }
+    </style>
+</head>
+<body>
+    <form name="inputs"
+          autocomplete="on"
+         novalidate
+         action="action.php">
+
+   <label for="name">Username: </label>
+   <input type="text" name="user" id="name"><br>
+
+   <label for="email">Email: </label>
+   <input type="email" name="useremail" id="email"><br>
+
+   <label for="password">Password:</label>
+   <input type="password" name="pwsd" id="password">
+
+   <p><input type="radio" name="gender" value="male" checked>Male</p>
+   <p><input type="radio" name="gender" value="female">Female</p>
+
+   <select name="hobbies" id="hobby" size="">
+    <option value="swimming">Swimming</option>
+    <option value="reading">Reading</option>
+    <option value="coding">Coding</option>
+    <option value="traveling">Travelling</option>
+   </select><br>
+
+   <input type="checkbox" name="hobbies" value="swim">Swimming <br>
+   <input type="checkbox" name="hobbies" value="skate">Skating <br>
+   <input type="checkbox" name="hobbies" value="reade">Reading <br>
+
+   <input type="submit">
+   <input type="reset" value="Clear"> 
+</form>
+    
+</body>
+</html>
