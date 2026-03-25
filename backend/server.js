@@ -6,9 +6,9 @@ const app = express()
 app.use(express.json())
 
 app.use(cors({
-    origin:['http://localhost:3000'],
-    credentials:true,
-    methods:["POST",'DELETE','PUT','GET','HEAD','PATCH']
+    origin: ['http://localhost:3000'],
+    credentials: true,
+    methods: ["POST", 'DELETE', 'PUT', 'GET', 'HEAD', 'PATCH']
 }));
 
 const db = mysql.createConnection({   //create a connection to mysqlzx6 /
@@ -70,6 +70,7 @@ app.delete('/student/:id', (req, res) => {
         if (err) return res.json("Error");
         return res.json(data)
     })
+
 })
 app.listen(8081, () => {
     console.log('listening');

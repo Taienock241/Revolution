@@ -77,7 +77,7 @@ function UpdateStudent() {
                         onChange={e=>setDate(e.target.value)}
                          />
                     </div>
-                    div
+                    
             
                     <button className='btn btn-success'>Update</button>
                 </form>
