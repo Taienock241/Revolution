@@ -5,12 +5,28 @@ import './App.css'
 
 function Student() {
   const [student, setStudent] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  const fetchStudents = async () => {
+    setLoading(true)
+    setError("")
+    try {
+      const res = await axios.get('http://localhost:8081/')
+      const payload = res?.data?.data
+      const safeData = Array.isArray(payload) ? payload : []
+      setStudent(safeData)
+    } catch (err) {
+      console.error("Failed to load students:", err)
+      setStudent([])
+      setError("Unable to load students. Check if backend is running on port 8081.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    axios.get('http://localhost:8081/')
-
-      .then(res => setStudent(res.data))
-      .catch(err => console.log(err))
+    fetchStudents()
   }, [])
 
  // axios.defaults.withCredentials = true
@@ -18,33 +34,33 @@ function Student() {
   const handleDelete = async (id) => {
     try {
       await axios.delete('http://localhost:8081/student/' + id)
-     // window.location.reload()
+      setStudent((prev) => prev.filter((item) => item.ID !== id))
     } catch (err) {
-      console.log(err);
+      console.error("Delete failed:", err)
+      setError("Delete failed. Please try again.")
     }
   }
   const navigate = useNavigate()
-  useEffect(()=>{
+  useEffect(() => {
     axios.get('http://localhost:8082')
-    .then(res=>{
-      //console.log(res)
-      if(res.data.valid){
-        navigate('/')
-
-      }else{
+      .then(res => {
+        if (!res?.data?.valid) {
+          navigate('/login')
+        }
+      })
+      .catch(err => {
+        console.error("Auth check failed:", err)
         navigate('/login')
-
-      }
-    })
-    .catch(err=>console.log(err))
-
-   },[])     
+      })
+  }, [navigate])
 
   return (
     <div className='d-flex vh-100 blend-bg justify-content-center align-items-center'>
-      <div className='w-80 bg-white rounded p-3'>
+      <div className='page-shell bg-white card-shell p-3'>
+        {error && <div className='status-banner error'>{error}</div>}
         <Link to='/create' className='btn btn-success'>Add +</Link>
-        <table className='table table-bordered table-striped mt-3'>
+        <div className='table-wrap mt-3'>
+        <table className='table table-bordered table-striped'>
           <thead>
             <tr>
               <th>First Name</th>
@@ -58,8 +74,17 @@ function Student() {
             </tr>
           </thead>
           <tbody>
-            {
-              student.map((data, i) => (
+            {loading && (
+              <tr>
+                <td colSpan='8' className='loading-row'>Loading students...</td>
+              </tr>
+            )}
+            {!loading && Array.isArray(student) && student.length === 0 && (
+              <tr>
+                <td colSpan='8' className='loading-row'>No students found.</td>
+              </tr>
+            )}
+            {!loading && Array.isArray(student) && student.map((data, i) => (
                 <tr key={i}>
                   <td>{data.First}</td>
                   <td>{data.Last}</td>
@@ -74,14 +99,14 @@ function Student() {
                     <button className='btn btn-danger ms-2' onClick={e => handleDelete(data.ID)}>Delete</button>
                   </td>
                 </tr>
-              ))
-            }
+              ))}
           </tbody>
         
         </table>
+        </div>
         <div className='d-flex justify-content-between'>
-        <Link to='/create' className='btn btn-success bg-primary'>Previous</Link>
-        <Link to='/create' className='btn btn-success bg-danger'>Next</Link>
+        <Link to='/create' className='btn btn-success bg-primary'>Add New</Link>
+        <button className='btn btn-secondary' onClick={fetchStudents}>Refresh</button>
 
 
         </div>

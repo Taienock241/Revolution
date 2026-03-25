@@ -10,30 +10,41 @@ function Login() {
         email: "",
         password: ""
     })
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
+
     const handleInput = (event) => {
-        setValues(prev => ({ ...prev, [event.target.name]: [event.target.value] }))
+        setValues(prev => ({ ...prev, [event.target.name]: event.target.value }))
     }
     axios.defaults.withCredentials = true
     const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault()
-        axios.post('http://localhost:8082/login', values)
-            .then(res => {
-                if (res.data.Login) {
-                    navigate('/')
-                } else {
-                    alert('No record')
-                }
-                console.log(res)
+        setError('')
+        if (!values.email || !values.password) {
+            setError('Email and password are required.')
+            return
+        }
 
-            })
-            .catch(err => console.log('Err'))
+        try {
+            setLoading(true)
+            const res = await axios.post('http://localhost:8082/login', values)
+            if (res?.data?.Login) {
+                navigate('/')
+            } else {
+                setError('No record found.')
+            }
+        } catch (err) {
+            console.error('Login request failed:', err)
+            setError('Login failed. Check if auth backend is running on port 8082.')
+        } finally {
+            setLoading(false)
+        }
     }
-    useEffect(()=>{
-        axios.get('http://localhost:8081')
+    useEffect(() => {
+        axios.get('http://localhost:8082')
         .then(res=>{
-          //console.log(res)
           if(res.data.valid){
            navigate('/')
     
@@ -42,32 +53,37 @@ function Login() {
     
           }
         })
-        .catch(err=>console.log(err))
+        .catch(err=>{
+            console.error('Session check failed:', err)
+        })
     
-       },[])     
+       },[navigate])     
 
     return (
-        <div className='d-flex vh-100 justify-content-center align-items-center blend-bg'>
-            <div className='w-50 bg-white rounded p-4'>
-                <h1>Sign-In</h1>
-                <form onSubmit={handleSubmit}>
+        <div className='page-wrap auth-wrap'>
+            <div className='auth-card card-shell'>
+                <h1 className='form-title'>Welcome Back</h1>
+                <p className='form-subtitle'>Sign in to manage students, records, and updates securely.</p>
+                <form onSubmit={handleSubmit} className='form-grid'>
+                    {error && <div className='status-banner error'>{error}</div>}
                     <div className='mb-3'>
-                        <label htmlFor='name'>Email</label>
-                        <input type='text' placeholder='enter Email' className='form-control' name='email'
+                        <label htmlFor='name' className='field-label'>Email Address</label>
+                        <input type='text' placeholder='name@company.com' className='form-control field-input' name='email'
                             onChange={handleInput}
                         />
 
                     </div>
                     <div className='mb-3'>
-                        <label htmlFor='password'>Password</label>
-                        <input type='password' placeholder='enter Password' className='form-control' name='password'
+                        <label htmlFor='password' className='field-label'>Password</label>
+                        <input type='password' placeholder='Enter your secure password' className='form-control field-input' name='password'
                             onChange={handleInput}
                         />
-                        <button type='submit' className='btn btn-success w-100 rounded-0'>Login</button>
-                        <p>You agree with our Terms And policies</p>
-                        <Link to='/signup' className='btn btn-default border w-100 bg-light rounded-0'>Create Account</Link>
 
                     </div>
+                    <button type='submit' className='btn app-btn btn-primary-main w-100' disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+                    <p className='form-meta'>By continuing, you agree to our terms and privacy policy.</p>
+                    <Link to='/signup' className='btn app-btn btn-ghost w-100'>Create Account</Link>
+
                 </form>
             </div>
         </div>

@@ -10,23 +10,36 @@ function CreateStudent() {
     const [reg, setReg] = useState('')
     const [idno, setIDNo] = useState('')
     const [email, setEmail] = useState('')
-    const[date,setDate]= useState([])
+    const [date, setDate] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState("")
     const navigate = useNavigate();
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault()
-        console.log("Submitting:", { first, last, course, reg, idno, email,date });
-        axios.post('http://localhost:8081/create', { first, last, course, reg, idno, email,date })
-            .then(res => {
-                // console.log(res)
-                console.log("Response:", res.data);
-                navigate('/')
-            }).catch(err => console.log(err))
+        setError("")
+        if (!first || !last || !course || !reg || !idno || !email || !date) {
+            setError("All fields are required.")
+            return
+        }
+
+        try {
+            setLoading(true)
+            const res = await axios.post('http://localhost:8081/create', { first, last, course, reg, idno, email, date })
+            console.log("Response:", res.data)
+            navigate('/')
+        } catch (err) {
+            console.error("Create student failed:", err)
+            setError("Unable to save student. Check backend connection.")
+        } finally {
+            setLoading(false)
+        }
     }
     return (
         <div className='d-flex vh-200 blend-bg justify-content-center align-items-center'>
-            <div className='w-50 bg-white rounded p-3'>
+            <div className='w-50 bg-white rounded p-3 card-shell'>
                 <form onSubmit={handleSubmit}>
+                    {error && <div className='status-banner error'>{error}</div>}
                     <h2>Add Student</h2>
                     <div className='mb-2'>
                         <label htmlFor=''>First Name</label>
@@ -78,7 +91,7 @@ function CreateStudent() {
                         onChange={e=>setDate(e.target.value)}
                          />
                     </div>
-                    <button className='btn btn-success'>Save</button>
+                    <button className='btn btn-success' disabled={loading}>{loading ? 'Saving...' : 'Save'}</button>
                 </form>
 
             </div>

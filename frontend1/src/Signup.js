@@ -10,53 +10,70 @@ function Signup() {
         email:"",
         password:""
      })
+      const [loading, setLoading] = useState(false)
+      const [error, setError] = useState('')
+
      const handleInput = (event)=>{
-        setValues(prev=>({...prev,[event.target.name]:[event.target.value]}))
+          setValues(prev=>({...prev,[event.target.name]:event.target.value}))
      }
     
       const navigate = useNavigate()
 
      const handleSubmit = async(event)=>{
         event.preventDefault()
-         axios.post('http://localhost:8082/signup',values)
-        .then(res=>{
+        setError('')
+        if (!values.name || !values.email || !values.password) {
+            setError('All fields are required.')
+            return
+        }
+
+        try {
+            setLoading(true)
+            const res = await axios.post('http://localhost:8082/signup',values)
             console.log(res.data)
             navigate('/login')
-        })
-         .catch(err=>console.log(err))   
+        } catch (err) {
+            console.error('Signup failed:', err)
+            setError('Unable to signup. Check backend/auth server.')
+        } finally {
+            setLoading(false)
+        }
      }
 
   return (
-    <div className='d-flex vh-100 justify-content-center align-items-center blend-bg'>
-        <div className='w-50 bg-white rounded p-4'>
-                <h1>Sign-Up</h1>
-            <form onSubmit={handleSubmit}>
+    <div className='page-wrap auth-wrap'>
+        <div className='auth-card card-shell'>
+                <h1 className='form-title'>Create Account</h1>
+                <p className='form-subtitle'>Get started with your student management workspace.</p>
+            <form onSubmit={handleSubmit} className='form-grid'>
+            {error && <div className='status-banner error'>{error}</div>}
                 <div className='mb-3'>
-                <label htmlFor='username'>Username</label>
-                <input type='text' placeholder='enter Username' className='form-control' name='name' value={values.name}
+                <label htmlFor='username' className='field-label'>Full Name</label>
+                <input type='text' placeholder='Enter your full name' className='form-control field-input' name='name' value={values.name}
                     onChange={handleInput}
                 />
 
                 </div>
 
                 <div className='mb-3'>
-                <label htmlFor='name'>Email</label>
-                <input type='text' placeholder='enter Email' className='form-control' name='email' value={values.email}
+                <label htmlFor='name' className='field-label'>Email Address</label>
+                <input type='text' placeholder='name@company.com' className='form-control field-input' name='email' value={values.email}
                     onChange={handleInput}
                 />
 
                 </div>
 
                 <div className='mb-3'>
-                <label htmlFor='password'>Password</label>
-                <input type='password' placeholder='enter Password' className='form-control' name='password' value={values.password}
+                <label htmlFor='password' className='field-label'>Password</label>
+                <input type='password' placeholder='Create a secure password' className='form-control field-input' name='password' value={values.password}
                     onChange={handleInput}
                 />
-                <button type='submit' className='btn btn-success w-100 rounded-0'>Sign Up</button>
-                <p>You agree with our Terms And policies</p>
-                <Link to ='/login' className='btn btn-default  border w-100 bg-danger rounded-0'>Login</Link>
+
+                </div>
+                <button type='submit' className='btn app-btn btn-primary-main w-100' disabled={loading}>{loading ? 'Creating...' : 'Sign Up'}</button>
+                <p className='form-meta'>Your account gives you access to secure student CRUD operations.</p>
+                <Link to ='/login' className='btn app-btn btn-ghost w-100'>Login</Link>
       
-                </div>
             </form>
         </div>
     </div>
